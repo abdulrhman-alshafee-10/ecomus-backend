@@ -1,0 +1,35 @@
+# Node.js dependencies
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Build outputs
+dist/
+build/
+
+# Coverage reports
+coverage/
+
+# Misc
+*.swp
+*.swo
+
+# IDE files
+.vscode/
+.idea/
+
+# Others
+config/local.js
