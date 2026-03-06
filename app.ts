@@ -7,6 +7,7 @@ import connectDB from './src/config/db';
 import { errorHandler, notFound } from './src/middleware/errorHandler';
 import { globalLimiter } from './src/middleware/rateLimiter';
 import authRoutes from './src/routes/authRoutes';
+import searchRoutes from './src/routes/searchRoutes';
 import categoryRoutes from './src/routes/categoryRoutes';
 import productRoutes from './src/routes/productRoutes';
 import orderRoutes from './src/routes/orderRoutes';
@@ -34,6 +35,7 @@ app.get('/', (_req, res) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/search', searchRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
