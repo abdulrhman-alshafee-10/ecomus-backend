@@ -29,30 +29,30 @@ export const search = async (req: Request, res: Response, next: NextFunction): P
         const [products, categories, blogs] = await Promise.all([
             runProducts
                 ? Product.find({
-                      isActive: true,
-                      $or: [
-                          { name: regex },
-                          { brand: regex },
-                          { description: regex },
-                          { tags: regex },
-                      ],
-                  })
-                      .populate('category', 'name slug')
-                      .select('name slug price salePrice images brand rating category isFeatured')
-                      .skip(skip)
-                      .limit(limit)
+                    isActive: true,
+                    $or: [
+                        { name: regex },
+                        { brand: regex },
+                        { description: regex },
+                        { tags: regex },
+                    ],
+                })
+                    .populate('category', 'name slug')
+                    .select('name slug price salePrice images brand rating category isFeatured')
+                    .skip(skip)
+                    .limit(limit)
                 : Promise.resolve(null),
 
             runCategories
                 ? Category.find({ isActive: true, $or: [{ name: regex }, { description: regex }] })
-                      .select('name slug description image')
-                      .limit(10)
+                    .select('name slug description image')
+                    .limit(10)
                 : Promise.resolve(null),
 
             runBlogs
                 ? Blog.find({ isPublished: true, $or: [{ title: regex }, { excerpt: regex }, { tags: regex }] })
-                      .select('title slug excerpt coverImage publishedAt')
-                      .limit(10)
+                    .select('title slug excerpt coverImage publishedAt')
+                    .limit(10)
                 : Promise.resolve(null),
         ]);
 
