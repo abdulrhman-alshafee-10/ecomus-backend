@@ -19,6 +19,7 @@ export interface IUser extends Document {
     role: 'customer' | 'admin';
     addresses: IAddress[];
     wishlist: mongoose.Types.ObjectId[];
+    recentlyViewed: mongoose.Types.ObjectId[];
     isActive: boolean;
     createdAt: Date;
     updatedAt: Date;
@@ -44,6 +45,7 @@ const userSchema = new Schema<IUser>(
         role: { type: String, enum: ['customer', 'admin'], default: 'customer' },
         addresses: [addressSchema],
         wishlist: [{ type: Schema.Types.ObjectId, ref: 'Product' }],
+        recentlyViewed: [{ type: Schema.Types.ObjectId, ref: 'Product' }],
         isActive: { type: Boolean, default: true },
     },
     { timestamps: true }
