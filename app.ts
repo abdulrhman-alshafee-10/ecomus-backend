@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import connectDB from './src/config/db';
 import { errorHandler, notFound } from './src/middleware/errorHandler';
 import { globalLimiter } from './src/middleware/rateLimiter';
+import authRoutes from './src/routes/authRoutes';
 
 const app = express();
 
@@ -24,6 +25,9 @@ app.use(globalLimiter);
 app.get('/', (_req, res) => {
     res.json({ status: 'ok', message: 'Ecomus API is running 🚀' });
 });
+
+// Routes
+app.use('/api/auth', authRoutes);
 
 // 404 + Error Handler (must be last)
 app.use(notFound);
