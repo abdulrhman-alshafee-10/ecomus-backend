@@ -1,8 +1,10 @@
 import 'dotenv/config';
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import swaggerUi from 'swagger-ui-express';
+import swaggerSpec from './src/config/swagger';
 import connectDB from './src/config/db';
 import { errorHandler, notFound } from './src/middleware/errorHandler';
 import { globalLimiter } from './src/middleware/rateLimiter';
@@ -28,8 +30,23 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(globalLimiter);
 
+// Swagger docs — disable helmet CSP for this route so the UI loads correctly
+app.use('/api/docs', (_req: Request, res: Response, next: NextFunction) => {
+    res.setHeader('Content-Security-Policy', '');
+    next();
+}, swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+    customSiteTitle: 'Ecomus API Docs',
+    swaggerOptions: { persistAuthorization: true },
+}));
+
+// Expose raw OpenAPI JSON
+app.get('/api/docs.json', (_req: Request, res: Response) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
+});
+
 // Health check
-app.get('/', (_req, res) => {
+app.get('/', (_req: Request, res: Response) => {
     res.json({ status: 'ok', message: 'Ecomus API is running 🚀' });
 });
 
