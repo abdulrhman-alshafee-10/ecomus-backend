@@ -128,3 +128,69 @@ export const getFeaturedProducts = async (_req: Request, res: Response, next: Ne
         next(error);
     }
 };
+
+// @desc    Get new arrivals (latest products)
+// @route   GET /api/products/new-arrivals?limit=8
+// @access  Public
+export const getNewArrivals = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const limit = Math.min(50, parseInt(req.query.limit as string || '8', 10));
+        const products = await Product.find({ isActive: true })
+            .populate('category', 'name slug')
+            .sort({ createdAt: -1 })
+            .limit(limit)
+            .select('name slug price salePrice images brand rating category isFeatured createdAt');
+        res.status(200).json({ success: true, count: products.length, data: products });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// @desc    Get best sellers (most sold)
+// @route   GET /api/products/best-sellers?limit=8
+// @access  Public
+export const getBestSellers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const limit = Math.min(50, parseInt(req.query.limit as string || '8', 10));
+        const products = await Product.find({ isActive: true, sold: { $gt: 0 } })
+            .populate('category', 'name slug')
+            .sort({ sold: -1 })
+            .limit(limit)
+            .select('name slug price salePrice images brand rating category sold');
+        res.status(200).json({ success: true, count: products.length, data: products });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// @desc    Get related products (same category + overlapping tags, excludes current)
+// @route   GET /api/products/:id/related?limit=8
+// @access  Public
+export const getRelatedProducts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const product = await Product.findById(req.params.id).select('category tags');
+        if (!product) {
+            res.status(404).json({ success: false, message: 'Product not found' });
+            return;
+        }
+
+        const limit = Math.min(20, parseInt(req.query.limit as string || '8', 10));
+
+        const related = await Product.find({
+            _id: { $ne: product._id },
+            isActive: true,
+            $or: [
+                { category: product.category },
+                { tags: { $in: product.tags } },
+            ],
+        })
+            .populate('category', 'name slug')
+            .sort({ 'rating.average': -1 })
+            .limit(limit)
+            .select('name slug price salePrice images brand rating category');
+
+        res.status(200).json({ success: true, count: related.length, data: related });
+    } catch (error) {
+        next(error);
+    }
+};
