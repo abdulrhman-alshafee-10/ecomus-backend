@@ -3,6 +3,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './src/config/swagger';
 import connectDB from './src/config/db';
@@ -16,6 +17,9 @@ import orderRoutes from './src/routes/orderRoutes';
 import reviewRoutes from './src/routes/reviewRoutes';
 import blogRoutes from './src/routes/blogRoutes';
 import commentRoutes from './src/routes/commentRoutes';
+import userRoutes from './src/routes/userRoutes';
+import statsRoutes from './src/routes/statsRoutes';
+import uploadRoutes from './src/routes/uploadRoutes';
 
 const app = express();
 
@@ -29,6 +33,9 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(globalLimiter);
+
+// Serve uploaded images as static files
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Swagger docs — disable helmet CSP for this route so the UI loads correctly
 app.use('/api/docs', (_req: Request, res: Response, next: NextFunction) => {
@@ -59,6 +66,9 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/comments', commentRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/stats', statsRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // 404 + Error Handler (must be last)
 app.use(notFound);

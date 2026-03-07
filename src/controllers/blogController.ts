@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { Request, Response, NextFunction } from 'express';
 import Blog from '../models/Blog';
 import { AuthRequest } from '../middleware/auth';
@@ -9,8 +10,11 @@ import { IBlog } from '../models/Blog';
 // @access  Public
 export const getBlogs = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+        const showAll = req.query.all === 'true';
+        const baseFilter = showAll ? {} : { isPublished: true };
+
         const features = new ApiFeatures<IBlog>(
-            Blog.find({ isPublished: true }).populate('author', 'name avatar'),
+            Blog.find(baseFilter).populate('author', 'name avatar'),
             req.query as any
         )
             .search(['title', 'excerpt'])
@@ -18,7 +22,7 @@ export const getBlogs = async (req: Request, res: Response, next: NextFunction):
             .limitFields()
             .paginate();
 
-        const total = await Blog.countDocuments({ isPublished: true });
+        const total = await Blog.countDocuments(baseFilter);
         const blogs = await features.query;
 
         res.status(200).json({
@@ -39,7 +43,9 @@ export const getBlogs = async (req: Request, res: Response, next: NextFunction):
 // @access  Public
 export const getBlog = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const blog = await Blog.findOne({ slug: req.params.slug }).populate('author', 'name avatar');
+        const { slug } = req.params;
+        const query = mongoose.isValidObjectId(slug) ? { _id: slug } : { slug };
+        const blog = await Blog.findOne(query).populate('author', 'name avatar');
         if (!blog) {
             res.status(404).json({ success: false, message: 'Blog not found' });
             return;
